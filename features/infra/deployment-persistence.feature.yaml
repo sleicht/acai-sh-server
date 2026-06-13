@@ -1,0 +1,11 @@
+feature:
+    name: deployment-persistence
+    product: infra
+    description: Keeps production state durable across container redeployments.
+
+constraints:
+    DATABASE:
+        name: Database persistence requirements
+        requirements:
+            1: Production Postgres data survives app image pull and stack redeploy operations.
+            2: Production Compose uses a fixed, externally managed Docker volume for Postgres data.
