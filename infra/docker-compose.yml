@@ -89,7 +89,6 @@ services:
       BACKUP_HEARTBEAT_URL: ${BACKUP_HEARTBEAT_URL:-}
     volumes:
       - backup_data:/var/backups
-      - ./backup:/opt/backup:ro
     entrypoint: ["/opt/backup/entrypoint.sh"]
     logging:
       driver: "json-file"
