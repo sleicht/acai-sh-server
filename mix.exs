@@ -46,6 +46,8 @@ defmodule Acai.MixProject do
       {:ecto_psql_extras, "~> 0.8"},
       {:ecto_sql, "~> 3.13"},
       {:esbuild, "~> 0.10", runtime: Mix.env() == :dev},
+      # email-delivery.SMTP.1
+      {:gen_smtp, "~> 1.3"},
       {:gettext, "~> 1.0"},
       {:heroicons,
        github: "tailwindlabs/heroicons",

@@ -120,11 +120,18 @@ services:
         condition: service_healthy
     environment:
       DATABASE_URL: "ecto://${POSTGRES_USER:-}:${POSTGRES_PASSWORD:-}@${POSTGRES_HOST:-db}:${POSTGRES_PORT:-5432}/${POSTGRES_DB:-acai_prod}"
-      MAILGUN_API_KEY: ${MAILGUN_API_KEY:-}
-      MAILGUN_DOMAIN: ${MAILGUN_DOMAIN:-mg.acai.sh}
-      MAILGUN_BASE_URL: ${MAILGUN_BASE_URL:-https://api.eu.mailgun.net/v3}
+      # email-delivery.SMTP.3
+      SMTP_RELAY: ${SMTP_RELAY:-smtp.example.com}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_SSL: ${SMTP_SSL:-false}
+      SMTP_TLS: ${SMTP_TLS:-always}
+      SMTP_AUTH: ${SMTP_AUTH:-always}
+      SMTP_RETRIES: ${SMTP_RETRIES:-2}
+      SMTP_NO_MX_LOOKUPS: ${SMTP_NO_MX_LOOKUPS:-false}
       MAIL_FROM_NAME: ${MAIL_FROM_NAME:-acai.sh}
-      MAIL_FROM_EMAIL: ${MAIL_FROM_EMAIL:-noreply@mg.acai.sh}
+      MAIL_FROM_EMAIL: ${MAIL_FROM_EMAIL:-noreply@acai.sh}
       MIX_ENV: prod
       PHX_PORT: ${PHX_PORT:-4000}
       PLAUSIBLE_SRC: ${PLAUSIBLE_SRC:-}

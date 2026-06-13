@@ -18,7 +18,70 @@ url_scheme = System.get_env("URL_SCHEME", "https")
 int_env = fn name, default ->
   case System.get_env(name) do
     nil -> default
+    "" -> default
     value -> String.to_integer(value)
+  end
+end
+
+env_string = fn name ->
+  case System.get_env(name) do
+    nil ->
+      nil
+
+    value ->
+      value = String.trim(value)
+      if value == "", do: nil, else: value
+  end
+end
+
+bool_env = fn name, default ->
+  case System.get_env(name) do
+    nil ->
+      default
+
+    "" ->
+      default
+
+    value ->
+      case String.downcase(String.trim(value)) do
+        value when value in ["true", "1", "yes"] ->
+          true
+
+        value when value in ["false", "0", "no"] ->
+          false
+
+        _value ->
+          raise """
+          environment variable #{name} must be one of: true, false, 1, 0, yes, no
+          """
+      end
+  end
+end
+
+smtp_mode_env = fn name, default ->
+  case System.get_env(name) do
+    nil ->
+      default
+
+    "" ->
+      default
+
+    value ->
+      case value |> String.trim() |> String.downcase() |> String.replace("-", "_") do
+        "always" ->
+          :always
+
+        "if_available" ->
+          :if_available
+
+        "never" ->
+          :never
+
+        _value ->
+          raise """
+          environment variable #{name} must be one of: always, if_available, never
+          """
+      end
   end
 end
 
@@ -168,12 +231,23 @@ if config_env() == :prod do
     # pool_count: 4,
     socket_options: maybe_ipv6
 
-  config :acai, Acai.Mailer,
-    adapter: Swoosh.Adapters.Mailgun,
-    api_key: System.get_env("MAILGUN_API_KEY"),
-    domain: System.get_env("MAILGUN_DOMAIN"),
-    base_url: System.get_env("MAILGUN_BASE_URL")
+  smtp_relay =
+    env_string.("SMTP_RELAY") ||
+      raise("""
+      environment variable SMTP_RELAY is missing.
+      For example: smtp.example.com
+      """)
 
-  # See https://hexdocs.pm/swoosh/Swoosh.html#module-installation for details.
-  config :swoosh, :api_client, Swoosh.ApiClient.Req
+  # email-delivery.SMTP.1 email-delivery.SMTP.2
+  config :acai, Acai.Mailer,
+    adapter: Swoosh.Adapters.SMTP,
+    relay: smtp_relay,
+    username: env_string.("SMTP_USERNAME"),
+    password: env_string.("SMTP_PASSWORD"),
+    port: int_env.("SMTP_PORT", 587),
+    ssl: bool_env.("SMTP_SSL", false),
+    tls: smtp_mode_env.("SMTP_TLS", :always),
+    auth: smtp_mode_env.("SMTP_AUTH", :always),
+    retries: int_env.("SMTP_RETRIES", 2),
+    no_mx_lookups: bool_env.("SMTP_NO_MX_LOOKUPS", false)
 end

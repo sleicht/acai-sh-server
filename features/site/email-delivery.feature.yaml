@@ -1,0 +1,12 @@
+feature:
+    name: email-delivery
+    product: site
+    description: Configures outbound application email delivery.
+
+constraints:
+    SMTP:
+        name: SMTP delivery requirements
+        requirements:
+            1: Production outbound email is sent via SMTP instead of Mailgun's HTTP API.
+            2: SMTP connection settings are provided through runtime environment variables.
+            3: Deployment examples expose SMTP variables and do not require Mailgun variables.
