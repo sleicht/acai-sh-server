@@ -34,8 +34,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       POSTGRES_DB: ${POSTGRES_DB:-acai_prod}
     volumes:
-      # deployment-persistence.DATABASE.1 deployment-persistence.DATABASE.2
-      - postgres_data:/var/lib/postgresql
+      - postgres_data:/var/lib/postgresql/data
     healthcheck:
       test:
         [
