@@ -85,13 +85,19 @@ smtp_mode_env = fn name, default ->
   end
 end
 
-smtp_tls_options = fn relay ->
+smtp_tls_options = fn relay, cacertfile ->
+  tls_options = [
+    verify: :verify_peer,
+    cacertfile: cacertfile,
+    depth: 4
+  ]
+
   case :inet.parse_address(String.to_charlist(relay)) do
     {:ok, _ip_address} ->
-      []
+      tls_options
 
     {:error, :einval} ->
-      [server_name_indication: String.to_charlist(relay)]
+      tls_options ++ [server_name_indication: String.to_charlist(relay)]
   end
 end
 
@@ -248,6 +254,8 @@ if config_env() == :prod do
       For example: smtp.example.com
       """)
 
+  smtp_cacertfile = env_string.("SMTP_CACERTFILE") || "/etc/ssl/certs/ca-certificates.crt"
+
   # email-delivery.SMTP.1 email-delivery.SMTP.2
   config :acai, Acai.Mailer,
     adapter: Swoosh.Adapters.SMTP,
@@ -257,7 +265,7 @@ if config_env() == :prod do
     port: int_env.("SMTP_PORT", 587),
     ssl: bool_env.("SMTP_SSL", false),
     tls: smtp_mode_env.("SMTP_TLS", :always),
-    tls_options: smtp_tls_options.(smtp_relay),
+    tls_options: smtp_tls_options.(smtp_relay, smtp_cacertfile),
     auth: smtp_mode_env.("SMTP_AUTH", :always),
     retries: int_env.("SMTP_RETRIES", 2),
     no_mx_lookups: bool_env.("SMTP_NO_MX_LOOKUPS", true)

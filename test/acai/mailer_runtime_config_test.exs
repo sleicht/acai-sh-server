@@ -7,6 +7,7 @@ defmodule Acai.MailerRuntimeConfigTest do
     POOL_SIZE
     SECRET_KEY_BASE
     SMTP_AUTH
+    SMTP_CACERTFILE
     SMTP_NO_MX_LOOKUPS
     SMTP_PASSWORD
     SMTP_PORT
@@ -32,6 +33,7 @@ defmodule Acai.MailerRuntimeConfigTest do
   test "email-delivery.SMTP.1 email-delivery.SMTP.2: production mailer uses smtp environment settings" do
     put_prod_env(%{
       "SMTP_AUTH" => "if_available",
+      "SMTP_CACERTFILE" => "/custom/ca-bundle.crt",
       "SMTP_NO_MX_LOOKUPS" => "true",
       "SMTP_PASSWORD" => "smtp-pass",
       "SMTP_PORT" => "2525",
@@ -51,7 +53,14 @@ defmodule Acai.MailerRuntimeConfigTest do
     assert mailer_config[:port] == 2525
     assert mailer_config[:ssl] == true
     assert mailer_config[:tls] == :never
-    assert mailer_config[:tls_options] == [server_name_indication: ~c"smtp.example.com"]
+
+    assert mailer_config[:tls_options] == [
+             verify: :verify_peer,
+             cacertfile: "/custom/ca-bundle.crt",
+             depth: 4,
+             server_name_indication: ~c"smtp.example.com"
+           ]
+
     assert mailer_config[:auth] == :if_available
     assert mailer_config[:retries] == 5
     assert mailer_config[:no_mx_lookups] == true
@@ -63,7 +72,14 @@ defmodule Acai.MailerRuntimeConfigTest do
     mailer_config = prod_mailer_config()
 
     assert mailer_config[:relay] == "mail.example.com"
-    assert mailer_config[:tls_options] == [server_name_indication: ~c"mail.example.com"]
+
+    assert mailer_config[:tls_options] == [
+             verify: :verify_peer,
+             cacertfile: "/etc/ssl/certs/ca-certificates.crt",
+             depth: 4,
+             server_name_indication: ~c"mail.example.com"
+           ]
+
     assert mailer_config[:no_mx_lookups] == true
   end
 
