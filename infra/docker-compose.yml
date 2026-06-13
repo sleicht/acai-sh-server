@@ -129,7 +129,7 @@ services:
       SMTP_TLS: ${SMTP_TLS:-always}
       SMTP_AUTH: ${SMTP_AUTH:-always}
       SMTP_RETRIES: ${SMTP_RETRIES:-2}
-      SMTP_NO_MX_LOOKUPS: ${SMTP_NO_MX_LOOKUPS:-false}
+      SMTP_NO_MX_LOOKUPS: ${SMTP_NO_MX_LOOKUPS:-true}
       MAIL_FROM_NAME: ${MAIL_FROM_NAME:-acai.sh}
       MAIL_FROM_EMAIL: ${MAIL_FROM_EMAIL:-noreply@acai.sh}
       MIX_ENV: prod

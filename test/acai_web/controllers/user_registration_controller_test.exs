@@ -1,5 +1,5 @@
 defmodule AcaiWeb.UserRegistrationControllerTest do
-  use AcaiWeb.ConnCase, async: true
+  use AcaiWeb.ConnCase, async: false
 
   import Acai.AccountsFixtures
 
@@ -35,6 +35,24 @@ defmodule AcaiWeb.UserRegistrationControllerTest do
 
       assert conn.assigns.flash["info"] =~
                ~r/An email was sent to .*, please access it to confirm your account/
+    end
+
+    @tag :capture_log
+    test "email-delivery.SMTP.4: redirects with an error when email delivery fails", %{conn: conn} do
+      previous_mailer_config = Application.get_env(:acai, Acai.Mailer)
+      Application.put_env(:acai, Acai.Mailer, adapter: Acai.Support.FailingMailerAdapter)
+
+      on_exit(fn ->
+        Application.put_env(:acai, Acai.Mailer, previous_mailer_config)
+      end)
+
+      conn =
+        post(conn, ~p"/users/register", %{
+          "user" => valid_user_attributes(email: unique_user_email())
+        })
+
+      assert redirected_to(conn) == ~p"/users/log-in"
+      assert conn.assigns.flash["error"] =~ "could not send the confirmation email"
     end
 
     test "render errors for invalid data", %{conn: conn} do

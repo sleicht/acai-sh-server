@@ -85,6 +85,16 @@ smtp_mode_env = fn name, default ->
   end
 end
 
+smtp_tls_options = fn relay ->
+  case :inet.parse_address(String.to_charlist(relay)) do
+    {:ok, _ip_address} ->
+      []
+
+    {:error, :einval} ->
+      [server_name_indication: String.to_charlist(relay)]
+  end
+end
+
 non_prod? = config_env() != :prod
 
 api_default_request_size_cap = if non_prod?, do: 2_000_000, else: 1_000_000
@@ -247,7 +257,8 @@ if config_env() == :prod do
     port: int_env.("SMTP_PORT", 587),
     ssl: bool_env.("SMTP_SSL", false),
     tls: smtp_mode_env.("SMTP_TLS", :always),
+    tls_options: smtp_tls_options.(smtp_relay),
     auth: smtp_mode_env.("SMTP_AUTH", :always),
     retries: int_env.("SMTP_RETRIES", 2),
-    no_mx_lookups: bool_env.("SMTP_NO_MX_LOOKUPS", false)
+    no_mx_lookups: bool_env.("SMTP_NO_MX_LOOKUPS", true)
 end
