@@ -144,7 +144,7 @@ services:
     # Reachable by your Caddy as `acai-app:4000` over the shared network.
     networks:
       default: {}
-      proxy-network:
+      caddy_net:
         aliases:
           - acai-app
     # Optional: only needed if you run infra/app/upgrade-app.sh from the host,
@@ -165,10 +165,14 @@ services:
           memory: 512M
 
 networks:
+  # Internal network for app <-> db <-> backup. Created automatically.
   default: {}
-  proxy-network:
-    name: proxy-network
+  # Shared network with your existing Caddy stack.
+  # Set `name:` to your actual Caddy network (see `docker network ls`),
+  # or create one (`docker network create caddy_net`) and attach Caddy to it.
+  caddy_net:
     external: true
+    name: ${CADDY_NETWORK:-caddy_net}
 
 volumes:
   postgres_data:
